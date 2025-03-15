@@ -62,7 +62,8 @@ class MovieDetailsFragment : Fragment(), Injectable {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val movieId = arguments?.getInt("movieId") ?: -1
-        viewModel.loadMovie(movieId)
+        val isLiked = arguments?.getBoolean("isLiked") ?: false
+        viewModel.loadMovie(movieId, isLiked)
     }
 }
 

@@ -87,6 +87,7 @@ class MoviesComposeFragment : Fragment(), Injectable {
                     is NavigationEvent.OpenMovieDetails -> {
                         findNavController().navigate(R.id.movieDetailsFragment, Bundle().apply {
                             putInt("movieId", event.movieId)
+                            putBoolean("isLiked", event.isLiked)
                         })
                     }
                 }

@@ -70,11 +70,11 @@ class MoviesViewModel @Inject constructor(
 
     fun openMovieDetails(movie: Movie) {
         viewModelScope.launch {
-            navigationMutableFlow.emit(NavigationEvent.OpenMovieDetails(movie.id))
+            navigationMutableFlow.emit(NavigationEvent.OpenMovieDetails(movie.id, movie.liked))
         }
     }
 }
 
 sealed class NavigationEvent {
-    data class OpenMovieDetails(val movieId: Int) : NavigationEvent()
+    data class OpenMovieDetails(val movieId: Int, val isLiked: Boolean) : NavigationEvent()
 }

@@ -22,10 +22,10 @@ class MovieDetailsViewModel @Inject constructor(
     private val _movieFlow = MutableStateFlow<Movie?>(null)
     val movieFlow: StateFlow<Movie?> = _movieFlow.asStateFlow()
 
-    fun loadMovie(movieId: Int) {
+    fun loadMovie(movieId: Int, isLiked: Boolean) {
         viewModelScope.launch {
             when (val result = getMovieUseCase(movieId)) {
-                is Result.Success -> _movieFlow.emit(result.data)
+                is Result.Success -> _movieFlow.emit(result.data.copy(liked = isLiked))
                 is Result.Error -> {
                     TODO()
                 }
