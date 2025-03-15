@@ -17,7 +17,24 @@ class MoviesRepositoryImpl @Inject constructor(
     private val restStore = MoviesRestStore()
 
     override suspend fun getMovies(): Result<List<Movie>> {
-        TODO("Not yet implemented")
+        return try {
+            val localMovies = localStore.getMovies()
+            if (localMovies.isNotEmpty()) {
+                Result.Success(localMovies.map(mapper.mapFromLocal))
+            } else {
+                try {
+                    val remoteMovies = restStore.getMovies()
+                    remoteMovies.forEach { movie ->
+                        localStore.saveMovie(mapper.mapToLocal(movie))
+                    }
+                    Result.Success(remoteMovies)
+                } catch (e: Exception) {
+                    Result.Error(e)
+                }
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override suspend fun getMovie(id: Int): Result<Movie> {
