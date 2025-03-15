@@ -7,8 +7,11 @@ import app.bettermetesttask.domainmovies.entries.Movie
 import app.bettermetesttask.domainmovies.interactors.AddMovieToFavoritesUseCase
 import app.bettermetesttask.domainmovies.interactors.ObserveMoviesUseCase
 import app.bettermetesttask.domainmovies.interactors.RemoveMovieFromFavoritesUseCase
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
@@ -22,9 +25,13 @@ class MoviesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val moviesMutableFlow: MutableStateFlow<MoviesState> = MutableStateFlow(MoviesState.Initial)
+    private val navigationMutableFlow = MutableSharedFlow<NavigationEvent>()
 
     val moviesStateFlow: StateFlow<MoviesState>
         get() = moviesMutableFlow.asStateFlow()
+
+    val navigationFlow: SharedFlow<NavigationEvent>
+        get() = navigationMutableFlow.asSharedFlow()
 
     fun loadMovies() {
         viewModelScope.launch {
@@ -62,6 +69,12 @@ class MoviesViewModel @Inject constructor(
     }
 
     fun openMovieDetails(movie: Movie) {
-        // TODO: todo todo todo todo
+        viewModelScope.launch {
+            navigationMutableFlow.emit(NavigationEvent.OpenMovieDetails(movie.id))
+        }
     }
+}
+
+sealed class NavigationEvent {
+    data class OpenMovieDetails(val movieId: Int) : NavigationEvent()
 }
