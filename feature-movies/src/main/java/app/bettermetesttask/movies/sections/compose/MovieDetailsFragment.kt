@@ -86,8 +86,9 @@ private fun MovieDetailsScreen(
                 actions = {
                     IconButton(onClick = onLikeClick) {
                         Icon(
-                            if (movie?.liked == true) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Add to Favorites"
+                            imageVector = if (movie?.liked == true) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Add to Favorites",
+                            tint = if (movie?.liked == true) Color.Red else Color.Gray
                         )
                     }
                 }
