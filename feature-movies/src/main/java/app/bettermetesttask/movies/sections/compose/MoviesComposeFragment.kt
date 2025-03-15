@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -102,7 +103,10 @@ private fun MoviesComposeScreen(
     onMovieClick: (Movie) -> Unit,
     onRetryClick: () -> Unit
 ) {
-    viewLoaded()
+    LaunchedEffect(Unit) {
+        viewLoaded()
+    }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -112,7 +116,10 @@ private fun MoviesComposeScreen(
             MoviesState.Initial -> {}
             is MoviesState.Loaded -> {
                 LazyColumn {
-                    items(moviesState.movies) { movie ->
+                    items(
+                        items = moviesState.movies,
+                        key = { it.id }
+                    ) { movie ->
                         MovieItem(
                             movie = movie,
                             onLikeClicked = { likeMovie(movie) },
