@@ -24,6 +24,10 @@ class MoviesLocalStore @Inject constructor(
         return moviesDao.selectMovieById(id).first()
     }
 
+    suspend fun saveMovie(movie: MovieEntity) {
+        moviesDao.insertMovie(movie)
+    }
+
     suspend fun likeMovie(id: Int) {
         moviesDao.insertLikedEntry(LikedMovieEntity(id))
     }
