@@ -2,12 +2,23 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/movies_graph_compose"
-    app:startDestination="@id/moviesFragmentCompose">
+    app:startDestination="@id/moviesComposeFragment">
 
     <fragment
-        android:id="@+id/moviesFragmentCompose"
-        android:name="app.bettermetesttask.movies.sections.compose.MoviesComposeFragment">
+        android:id="@+id/moviesComposeFragment"
+        android:name="app.bettermetesttask.movies.sections.compose.MoviesComposeFragment"
+        android:label="MoviesComposeFragment">
+        <action
+            android:id="@+id/actionMoviesComposeFragmentToMovieDetailsFragment"
+            app:destination="@id/movieDetailsFragment" />
+    </fragment>
 
-        <deepLink app:uri="@string/movies_deep_link_compose" />
+    <fragment
+        android:id="@+id/movieDetailsFragment"
+        android:name="app.bettermetesttask.movies.sections.compose.MovieDetailsFragment"
+        android:label="MovieDetailsFragment">
+        <argument
+            android:name="movieId"
+            app:argType="integer" />
     </fragment>
 </navigation>
