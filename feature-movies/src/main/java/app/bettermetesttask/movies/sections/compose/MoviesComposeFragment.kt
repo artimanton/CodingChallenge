@@ -5,31 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,12 +29,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import app.bettermetesttask.domainmovies.entries.Movie
 import app.bettermetesttask.featurecommon.injection.utils.Injectable
 import app.bettermetesttask.featurecommon.injection.viewmodel.SimpleViewModelProviderFactory
+import app.bettermetesttask.movies.R
 import app.bettermetesttask.movies.sections.MoviesState
 import app.bettermetesttask.movies.sections.MoviesViewModel
+import app.bettermetesttask.movies.sections.NavigationEvent
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -79,9 +69,26 @@ class MoviesComposeFragment : Fragment(), Injectable {
                 MoviesComposeScreen(
                     moviesState = viewState,
                     likeMovie = { movie -> viewModel.likeMovie(movie) },
+                    onMovieClick = { movie -> viewModel.openMovieDetails(movie) },
                     viewLoaded = { viewModel.loadMovies() },
                     onRetryClick = { viewModel.loadMovies() },
                 )
+            }
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.navigationFlow.collectLatest { event ->
+                when (event) {
+                    is NavigationEvent.OpenMovieDetails -> {
+                        findNavController().navigate(R.id.movieDetailsFragment, Bundle().apply {
+                            putInt("movieId", event.movieId)
+                        })
+                    }
+                }
             }
         }
     }
@@ -92,6 +99,7 @@ private fun MoviesComposeScreen(
     moviesState: MoviesState,
     likeMovie: (Movie) -> Unit,
     viewLoaded: () -> Unit,
+    onMovieClick: (Movie) -> Unit,
     onRetryClick: () -> Unit
 ) {
     viewLoaded()
@@ -104,10 +112,12 @@ private fun MoviesComposeScreen(
             MoviesState.Initial -> {}
             is MoviesState.Loaded -> {
                 LazyColumn {
-                    items(moviesState.movies) { item ->
-                        MovieItem(item, onLikeClicked = {
-                            likeMovie(item)
-                        })
+                    items(moviesState.movies) { movie ->
+                        MovieItem(
+                            movie = movie,
+                            onLikeClicked = { likeMovie(movie) },
+                            onMovieClicked = { onMovieClick(movie) }
+                        )
                     }
                 }
             }
@@ -155,18 +165,22 @@ private fun ErrorView(
                 containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text("Repeat")
+            Text("Retry")
         }
     }
 }
 
 @Composable
-fun MovieItem(movie: Movie, onLikeClicked: (Int) -> Unit) {
+private fun MovieItem(
+    movie: Movie,
+    onLikeClicked: () -> Unit,
+    onMovieClicked: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(12.dp),
+            .padding(8.dp)
+            .clickable(onClick = onMovieClicked),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Row(
@@ -193,7 +207,7 @@ fun MovieItem(movie: Movie, onLikeClicked: (Int) -> Unit) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            IconButton(onClick = { onLikeClicked(movie.id) }) {
+            IconButton(onClick = onLikeClicked) {
                 Icon(
                     imageVector = if (movie.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = "Like Button",
@@ -217,5 +231,5 @@ private fun PreviewsMoviesComposeScreen() {
                 liked = index % 2 == 0,
             )
         }
-    ), likeMovie = {}, viewLoaded = {}, onRetryClick = {})
+    ), likeMovie = {}, viewLoaded = {}, onRetryClick = {}, onMovieClick = {})
 }
