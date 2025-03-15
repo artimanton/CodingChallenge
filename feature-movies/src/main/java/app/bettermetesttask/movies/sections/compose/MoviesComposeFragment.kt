@@ -135,7 +135,22 @@ private fun MoviesComposeScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 4.dp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Loading movies...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
             is MoviesState.Error -> {
@@ -228,16 +243,46 @@ private fun MovieItem(
 
 @Composable
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+private fun PreviewMoviesComposeScreenLoading() {
+    MoviesComposeScreen(
+        moviesState = MoviesState.Loading,
+        likeMovie = {},
+        viewLoaded = {},
+        onRetryClick = {},
+        onMovieClick = {}
+    )
+}
+
+@Composable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 private fun PreviewsMoviesComposeScreen() {
-    MoviesComposeScreen(MoviesState.Loaded(
-        List(20) { index ->
-            Movie(
-                index,
-                "Title $index",
-                "Overview $index",
-                null,
-                liked = index % 2 == 0,
-            )
-        }
-    ), likeMovie = {}, viewLoaded = {}, onRetryClick = {}, onMovieClick = {})
+    MoviesComposeScreen(
+        moviesState = MoviesState.Loaded(
+            List(20) { index ->
+                Movie(
+                    index,
+                    "Title $index",
+                    "Overview $index",
+                    null,
+                    liked = index % 2 == 0,
+                )
+            }
+        ),
+        likeMovie = {},
+        viewLoaded = {},
+        onRetryClick = {},
+        onMovieClick = {}
+    )
+}
+
+@Composable
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+private fun PreviewMoviesComposeScreenError() {
+    MoviesComposeScreen(
+        moviesState = MoviesState.Error("Something went wrong"),
+        likeMovie = {},
+        viewLoaded = {},
+        onRetryClick = {},
+        onMovieClick = {}
+    )
 }
